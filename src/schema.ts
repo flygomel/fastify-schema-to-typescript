@@ -7,7 +7,20 @@ import path from "path";
 import { Options } from "./types";
 import { capitalize, writeFile } from "./utils";
 
-const compileOptions: Partial<CompilerOptions> = { bannerComment: "" };
+const compileOptions: Partial<CompilerOptions> = {
+  bannerComment: "",
+  cwd: "src/schemas/",
+  $refOptions: {
+    resolve: {
+      file: {
+        read(file) {
+          const data = fs.readFileSync(file.url + ".json").toString();
+          return addDefaultValueToSchema(JSON.parse(data) || defaultSchema);
+        },
+      },
+    },
+  },
+};
 const defaultSchema = { type: "object", additionalProperties: false };
 
 export function addDefaultValueToSchema(
@@ -34,6 +47,7 @@ export function addDefaultValueToSchema(
 
 export const defaultOptions = {
   glob: "src/**/schema.{json,yaml,yml}",
+  resolve: "src/schemas",
   prefix: "",
   ext: ".ts",
   module: "fastify",
